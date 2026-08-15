@@ -534,6 +534,45 @@ h2 {
   line-height: 1.35;
 }
 
+/* Privacy note ----------------------------------------------------------- */
+
+.privacy-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 26px 0 0;
+  padding: 13px 16px;
+  border: 1px solid color-mix(in srgb, var(--good) 32%, var(--line));
+  border-radius: var(--radius);
+  background: var(--good-soft);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  max-width: 58ch;
+}
+
+.privacy-note strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.privacy-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--good) 20%, transparent);
+  color: var(--good);
+  margin-top: 1px;
+}
+
+.privacy-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Demo panel */
 
 .demo-col {
