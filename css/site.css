@@ -173,7 +173,7 @@ kbd {
 .brand {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   text-decoration: none;
   color: var(--ink);
   flex: 0 0 auto;
@@ -182,9 +182,9 @@ kbd {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
   background: var(--ink);
   color: var(--paper);
   box-shadow: var(--shadow);
@@ -196,8 +196,8 @@ kbd {
 }
 
 .brand-mark svg {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
 }
 
 .mark-lines {
@@ -235,17 +235,17 @@ kbd {
 .brand-text {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
   line-height: 1;
 }
 
 .brand-name {
   display: block;
-  height: 30px;
+  height: 26px;
 }
 
 .brand-name svg {
-  height: 30px;
+  height: 26px;
   width: auto;
   display: block;
   overflow: visible;
@@ -265,10 +265,10 @@ kbd {
 
 .brand-tag {
   font-family: var(--serif);
-  font-size: 12.5px;
+  font-size: 9.5px;
   font-style: italic;
   font-weight: 400;
-  color: var(--ink-soft);
+  color: var(--ink-faint);
   letter-spacing: 0;
   text-transform: none;
   line-height: 1;
