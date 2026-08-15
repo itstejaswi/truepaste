@@ -464,6 +464,13 @@ h2 {
   margin-top: 12px;
 }
 
+/* The product name carries weight wherever it appears in body copy. */
+.lede strong,
+.note p strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
 /* Buttons ---------------------------------------------------------------- */
 
 .btn {
