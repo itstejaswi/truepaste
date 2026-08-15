@@ -166,11 +166,27 @@
               </span>
             </p>
 
-            <dl class="home-facts">
-              <div class="fact"><dt>0</dt><dd>things uploaded</dd></div>
-              <div class="fact"><dt>0</dt><dd>accounts needed</dd></div>
-              <div class="fact"><dt>0</dt><dd>pounds, dollars, rupees</dd></div>
-              <div class="fact"><dt>16</dt><dd>things it can clean</dd></div>
+            <dl class="colophon">
+              <div class="col-item">
+                <dt>Price</dt>
+                <dd>Free</dd>
+              </div>
+              <div class="col-item">
+                <dt>Account</dt>
+                <dd>None</dd>
+              </div>
+              <div class="col-item">
+                <dt>Limit</dt>
+                <dd>None</dd>
+              </div>
+              <div class="col-item">
+                <dt>Cleans</dt>
+                <dd>16 kinds of clutter</dd>
+              </div>
+              <div class="col-item">
+                <dt>Licence</dt>
+                <dd>Open source</dd>
+              </div>
             </dl>
           </div>
 
@@ -209,16 +225,19 @@
               <div class="pane">
                 <div class="pane-head">
                   <label for="input">Your text</label>
-                  <button id="sample" class="link-btn" type="button">Try an example</button>
+                  <span class="pane-actions">
+                    <button id="sample" class="link-btn" type="button">Try an example</button>
+                    <button id="clear" class="link-btn" type="button">Clear</button>
+                  </span>
                 </div>
-                <textarea id="input" rows="10" spellcheck="false" placeholder="Paste anything here."></textarea>
+                <textarea id="input" rows="16" spellcheck="false" placeholder="Paste anything here."></textarea>
               </div>
               <div class="pane">
                 <div class="pane-head">
                   <label for="output">Cleaned up</label>
                   <button id="copy" class="link-btn" type="button">Copy</button>
                 </div>
-                <textarea id="output" rows="10" spellcheck="false" readonly></textarea>
+                <textarea id="output" rows="16" spellcheck="false" readonly></textarea>
               </div>
             </div>
 
@@ -373,17 +392,17 @@ shasum -a 256 truepaste.zip                    # Mac, Linux</code></pre>
       <section class="view" id="view-privacy" role="tabpanel" aria-label="The promise" hidden>
         <div class="wrap">
           <div class="view-head">
-            <h2>Don't trust us. Check us.</h2>
+            <h2>How to know it's true</h2>
             <p class="lede">
-              Every tool says it respects your privacy. Here's how to find out
-              for yourself in about five minutes.
+              Every tool says it respects your privacy. Here's how to see it for
+              yourself in about five minutes.
             </p>
           </div>
 
           <div class="split">
             <table class="table">
               <thead>
-                <tr><th>What we say</th><th>How you'd catch us out</th></tr>
+                <tr><th>The claim</th><th>How to see it yourself</th></tr>
               </thead>
               <tbody>
                 <tr>

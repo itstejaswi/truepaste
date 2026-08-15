@@ -442,6 +442,12 @@ $('copy').addEventListener('click', async (event) => {
 
 $('input').addEventListener('input', run);
 
+$('clear').addEventListener('click', () => {
+  $('input').value = '';
+  run();
+  $('input').focus();
+});
+
 new SelectionOverlay({
   field: $('input'),
   getRules: () => ruleState,
