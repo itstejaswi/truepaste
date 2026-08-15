@@ -290,18 +290,28 @@ const SAMPLE =
  *
  * Built from DOM nodes rather than markup so nothing here can inject.
  */
+/**
+ * The demo paragraph. Written the way assistant output actually arrives:
+ * em-dashes, curly quotes, a bullet, a stray asterisk pair, and a narrow
+ * no-break space before the punctuation - on top of the genuinely invisible
+ * characters. Built from explicit codepoints so every artefact is visible in
+ * the source rather than hidden inside a literal.
+ */
 const DEMO_TEXT =
-  `Hi Sam,\u200b thanks for sending${toTagChars('id:9c4')} the draft over.\n` +
-  `It reads\u00a0well \u2014 I'll get\u202f you notes by Friday.${toVariationSelectors('w1')}`;
+  `Hi Sam,\u200b thanks for sending${toTagChars('id:9c4')} the draft \u2014 it reads\u00a0well.\n` +
+  `\u2022 The intro could be tighter${toVariationSelectors('w1')}\u202f, I think.`;
 
 const CHIP_LABELS = {
   invisible: 'zero-width',
-  tagChars: 'hidden text',
+  tagChars: 'hidden id',
   orphanVariationSelectors: 'watermark',
   exoticSpaces: 'odd space',
   suspiciousJoiners: 'stray joiner',
   bidi: 'reordering',
   dashes: 'em-dash',
+  quotes: 'curly quote',
+  miscPunctuation: 'bullet',
+  markdown: 'markdown',
 };
 
 let demoTimers = [];
@@ -320,7 +330,14 @@ function startDemo() {
   clearDemoTimers();
 
   // Work out where the hidden characters are, using the same engine as the tool.
-  const rules = { ...defaultRuleState(), dashes: true };
+  // Markdown is excluded here: its edits are multi-character and would produce
+  // chips that split words awkwardly in this compressed view.
+  const rules = {
+    ...defaultRuleState(),
+    dashes: true,
+    quotes: true,
+    miscPunctuation: true,
+  };
   const report = clean(DEMO_TEXT, { rules }).report;
 
   // Rebuild the paragraph, splitting it around each hidden character.
