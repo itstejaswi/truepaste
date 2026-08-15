@@ -394,6 +394,12 @@ kbd {
 
 .view-head {
   margin-bottom: 24px;
+  max-width: 68ch;
+}
+
+/* The dateline rule stops at the column edge on inner views. */
+.view-head .dateline {
+  margin-bottom: 14px;
 }
 
 .kicker {
@@ -528,7 +534,8 @@ h2 {
     position: absolute;
     top: 6%;
     bottom: 6%;
-    left: calc(50% - 4px);
+    /* Centred in the gutter between the two columns, not on the grid line. */
+    left: calc(50% - 15px);
     width: 1px;
     background: linear-gradient(
       to bottom,
@@ -650,11 +657,14 @@ h2 {
   flex-direction: column;
   justify-content: center;
   height: 100%;
+  min-height: 0;
 }
 
 .demo {
   display: flex;
   flex-direction: column;
+  /* Fill most of the column, leaving room for the caption beneath. */
+  max-height: calc(100% - 46px);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--raised);
@@ -680,14 +690,21 @@ h2 {
 
 .demo-body {
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 26px 22px;
-  font: 14.5px/2.1 var(--mono);
   min-height: 200px;
+}
+
+.demo-body p {
+  margin: 0;
+  font: 14.5px/2.1 var(--mono);
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.demo-body .chip {
+.demo-body p .chip {
   display: inline-block;
   padding: 0 5px;
   margin: 0;
@@ -729,6 +746,8 @@ h2 {
   font-size: 13.5px;
   color: var(--ink-faint);
   font-style: italic;
+  /* Balances the caption's own height so the panel centres on the headline. */
+  margin-bottom: -36px;
 }
 
 /* Tool ------------------------------------------------------------------- */
@@ -1027,6 +1046,25 @@ textarea:focus-visible {
   grid-template-columns: 1fr 1fr;
   gap: 44px;
   align-items: start;
+  position: relative;
+}
+
+/* The same hairline rule the home view carries between its columns. */
+@media (min-width: 1081px) {
+  .split::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: calc(50% - 1px);
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      var(--line),
+      var(--line) 84%,
+      transparent
+    );
+  }
 }
 
 .stack {

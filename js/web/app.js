@@ -8,7 +8,6 @@
 
 import { clean } from '../core/clean.js';
 import { RULES, defaultRuleState } from '../core/rules.js';
-import { SelectionOverlay } from './overlay.js';
 
 const RULES_KEY = 'truepaste.rules.v1';
 const THEME_KEY = 'truepaste.theme.v1';
@@ -61,20 +60,14 @@ function initTheme() {
 
 const VIEWS = ['home', 'tool', 'threats', 'install', 'privacy'];
 
-let overlay = null;
-
 function showView(name, { focus = false } = {}) {
   const view = VIEWS.includes(name) ? name : 'home';
-
   for (const id of VIEWS) {
     $(`view-${id}`).hidden = id !== view;
   }
   for (const tab of document.querySelectorAll('.tab')) {
     tab.setAttribute('aria-selected', String(tab.dataset.view === view));
   }
-
-  // The selection survives a view change; its floating button must not.
-  overlay?.hide();
 
   if (location.hash.slice(1) !== view) {
     history.replaceState(null, '', `#${view}`);
@@ -365,12 +358,14 @@ function startDemo() {
   }
 
   body.replaceChildren();
+  const para = document.createElement('p');
+  body.append(para);
   const chips = [];
   let cursor = 0;
 
   for (const run of runs) {
     if (run.start < cursor) continue;
-    body.append(document.createTextNode(DEMO_TEXT.slice(cursor, run.start)));
+    para.append(document.createTextNode(DEMO_TEXT.slice(cursor, run.start)));
 
     const chip = document.createElement('span');
     chip.className = 'chip';
@@ -379,12 +374,12 @@ function startDemo() {
         ? `${CHIP_LABELS[run.ruleId]} \u00d7${run.count}`
         : CHIP_LABELS[run.ruleId];
     chip.style.visibility = 'hidden';
-    body.append(chip);
+    para.append(chip);
     chips.push(chip);
 
     cursor = run.end;
   }
-  body.append(document.createTextNode(DEMO_TEXT.slice(cursor)));
+  para.append(document.createTextNode(DEMO_TEXT.slice(cursor)));
 
   status.textContent = 'Looks perfectly normal\u2026';
   status.classList.remove('found');
@@ -448,14 +443,7 @@ $('clear').addEventListener('click', () => {
   $('input').focus();
 });
 
-new SelectionOverlay({
-  field: $('input'),
-  getRules: () => ruleState,
-  onRulesChange: (next) => {
-    ruleState = next;
-    saveRules();
-    syncRuleCheckboxes();
-    run();
-  },
-  onApply: () => run(),
-});
+// The inline selection button belongs to the extension, not to this page:
+// here the cleaned text is already visible in the pane alongside, so a
+// "clean this selection" button would only suggest the work had not happened.
+// The overlay module stays in the repository for the extension to use.
