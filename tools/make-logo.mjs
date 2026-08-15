@@ -23,56 +23,59 @@ const PNG_SIZES = [16, 32, 48, 128, 256];
 
 /* Palette ---------------------------------------------------------------- */
 
-const INK = [44, 36, 24]; // #2c2418  shield
-const PAPER = [253, 246, 233]; // #fdf6e9  text lines
+const TILE = [44, 36, 24]; // #2c2418  the rounded tile behind the mark
+const SHIELD = [253, 246, 233]; // #fdf6e9  the shield itself
+const LINES = [44, 36, 24]; // text knocked out of the shield
 const FLAG = [194, 65, 12]; // #c2410c  the removed character
 const GOOD = [77, 156, 90]; // #4d9c5a  the tick
 
 /* Geometry, in a 32-unit square ------------------------------------------- */
 
+/** The rounded tile the header sets the mark on. */
+const TILE_RADIUS = 9.2;
+
 /**
  * Shield outline, matching the SVG path:
  *   M16 2.2 L27.4 6.4 V15.7 C..16 30.7.. C..4.6 15.7 V6.4 Z
- * The lower half is two cubic curves, flattened below into a polygon.
+ * Scaled slightly inside the tile so it has a margin.
  */
-const SHIELD = {
-  apex: [16, 2.2],
-  shoulderRight: [27.4, 6.4],
-  waistRight: [27.4, 15.7],
-  point: [16, 30.7],
-  waistLeft: [4.6, 15.7],
-  shoulderLeft: [4.6, 6.4],
-  // Control points for the two curves that form the lower half.
+const SHIELD_PATH = {
+  apex: [16, 5.6],
+  shoulderRight: [24.6, 8.8],
+  waistRight: [24.6, 15.8],
+  point: [16, 27.1],
+  waistLeft: [7.4, 15.8],
+  shoulderLeft: [7.4, 8.8],
   ctrlRight: [
-    [27.4, 22.9],
-    [22.6, 28.1],
+    [24.6, 21.2],
+    [21, 25.2],
   ],
   ctrlLeft: [
-    [9.4, 28.1],
-    [4.6, 22.9],
+    [11, 25.2],
+    [7.4, 21.2],
   ],
 };
 
 const TICK = {
   points: [
-    [7.6, 15.6],
-    [13.4, 22.0],
-    [24.0, 8.8],
+    [9.8, 15.9],
+    [14.2, 20.7],
+    [22.2, 10.8],
   ],
-  width: 2.9,
-  clearance: 6.6, // total width of the gap the tick cuts through the text
+  width: 2.3,
+  clearance: 5.0,
 };
 
 /**
- * Text lines, positioned clear of the tick's path.
- * The upper-left region holds the opening lines; the lower-right region holds
- * the broken line and its red remnant.
+ * Text lines inside the shield, positioned clear of the tick's path.
+ * `minSize` drops the finer lines from the small icons, where they would
+ * otherwise blur into the shield and muddy the mark.
  */
-const LINES = [
-  { y: 9.6, x1: 8.6, x2: 18.8, colour: PAPER, width: 1.9 },
-  { y: 13.2, x1: 8.6, x2: 15.0, colour: PAPER, width: 1.9 },
-  { y: 17.9, x1: 21.3, x2: 24.4, colour: FLAG, width: 2.1 },
-  { y: 21.6, x1: 18.6, x2: 23.4, colour: PAPER, width: 1.9 },
+const TEXT_LINES = [
+  { y: 11.2, x1: 10.2, x2: 17.9, colour: LINES, width: 1.5, minSize: 0 },
+  { y: 13.9, x1: 10.2, x2: 15.0, colour: LINES, width: 1.5, minSize: 48 },
+  { y: 18.4, x1: 18.2, x2: 20.5, colour: FLAG, width: 1.7, minSize: 0 },
+  { y: 21.2, x1: 16.2, x2: 19.8, colour: LINES, width: 1.5, minSize: 48 },
 ];
 
 const SAMPLES = 4; // supersampling per axis
@@ -88,7 +91,7 @@ function cubicAt(t, p0, c0, c1, p1) {
 }
 
 function buildShieldPolygon(steps = 48) {
-  const s = SHIELD;
+  const s = SHIELD_PATH;
   const pts = [s.apex, s.shoulderRight, s.waistRight];
   for (let i = 1; i <= steps; i += 1) {
     pts.push(cubicAt(i / steps, s.waistRight, s.ctrlRight[0], s.ctrlRight[1], s.point));
@@ -139,22 +142,47 @@ function distTick(x, y) {
   return Math.min(distSegment(x, y, a, b), distSegment(x, y, b, c));
 }
 
-/** Sample the mark at a point in 32-unit space. Returns a colour or null. */
-function sample(x, y) {
-  if (!insideShield(x, y)) return null;
+/** Distance to a rounded rectangle covering the whole square. */
+function insideTile(x, y) {
+  const half = 16 - 0.4;
+  const r = TILE_RADIUS;
+  const dx = Math.abs(x - 16) - (half - r);
+  const dy = Math.abs(y - 16) - (half - r);
+  const outer = Math.hypot(Math.max(dx, 0), Math.max(dy, 0));
+  return outer + Math.min(Math.max(dx, dy), 0) - r <= 0;
+}
 
+/**
+ * Sample the mark at a point in 32-unit space. Returns a colour or null.
+ *
+ * Below 128px the shield outline and the text lines cannot hold their shape, so
+ * the small icons show the tile and a bolder tick alone - the same silhouette
+ * the eye reads at a glance, without the detail that would blur into mud.
+ */
+function sample(x, y, size) {
+  if (!insideTile(x, y)) return null;
+
+  const small = size < 128;
   const tickDist = distTick(x, y);
-  if (tickDist <= TICK.width / 2) return GOOD;
+  const tickWidth = small ? TICK.width * 1.55 : TICK.width;
+
+  if (small) {
+    return tickDist <= tickWidth / 2 ? GOOD : TILE;
+  }
+
+  if (!insideShield(x, y)) return TILE;
+  if (tickDist <= tickWidth / 2) return GOOD;
 
   if (tickDist > TICK.clearance / 2) {
-    for (const line of LINES) {
+    for (const line of TEXT_LINES) {
+      if (size < line.minSize) continue;
       if (distCapsule(x, y, line.x1, line.x2, line.y, line.width / 2) <= 0) {
         return line.colour;
       }
     }
   }
 
-  return INK;
+  return SHIELD;
 }
 
 /* Rasteriser --------------------------------------------------------------- */
@@ -172,7 +200,7 @@ function render(size) {
         for (let sx = 0; sx < SAMPLES; sx += 1) {
           const x = ((px + (sx + 0.5) / SAMPLES) / size) * 32;
           const y = ((py + (sy + 0.5) / SAMPLES) / size) * 32;
-          const colour = sample(x, y);
+          const colour = sample(x, y, size);
           if (colour) {
             r += colour[0];
             g += colour[1];
