@@ -15,7 +15,13 @@ import { defaultRuleState } from './core/rules.js';
 const MENU_CLEAN = 'truepaste-clean-selection';
 const MENU_INSPECT = 'truepaste-inspect-selection';
 
-chrome.runtime.onInstalled.addListener(() => {
+/**
+ * Build the context menus.
+ *
+ * Registered on install and on browser start: a service worker that restarts
+ * does not re-run onInstalled, and menus created only there can go missing.
+ */
+function createMenus() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU_CLEAN,
@@ -28,7 +34,10 @@ chrome.runtime.onInstalled.addListener(() => {
       contexts: ['selection'],
     });
   });
-});
+}
+
+chrome.runtime.onInstalled.addListener(createMenus);
+chrome.runtime.onStartup.addListener(createMenus);
 
 /** Load the user's saved rule preferences, falling back to the defaults. */
 async function loadRuleState() {
@@ -93,49 +102,102 @@ async function flashBadge(text, colour) {
   setTimeout(() => chrome.action.setBadgeText({ text: '' }), 2500);
 }
 
+/**
+ * Store the last result for the popup to report.
+ *
+ * Session storage is preferred - it never touches disk - but it is not
+ * available in every build, so local storage is the fallback and failure is
+ * survivable either way.
+ */
+async function stashResult(result) {
+  try {
+    if (chrome.storage.session) {
+      await chrome.storage.session.set({ lastResult: result });
+      return;
+    }
+    await chrome.storage.local.set({ lastResult: result });
+  } catch (error) {
+    console.warn('TruePaste: could not store the result for the popup', error);
+  }
+}
+
+/**
+ * Open the popup so the result can be read. chrome.action.openPopup landed in
+ * Chrome 127 and is not available everywhere, so failure is not an error - the
+ * badge still reports the count and the popup shows the result when opened.
+ */
+async function openPopup() {
+  try {
+    await chrome.action.openPopup();
+  } catch {
+    // Older browser, or the call is not permitted in this context.
+  }
+}
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
   if (info.menuItemId !== MENU_CLEAN && info.menuItemId !== MENU_INSPECT) return;
 
-  // Prefer the live selection: info.selectionText is normalised by Chrome and
-  // loses the very characters we are looking for.
-  let source = '';
   try {
-    const [{ result }] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: readSelectionFromPage,
-    });
-    source = result ?? '';
-  } catch {
-    source = info.selectionText ?? '';
-  }
-  if (!source) return;
-
-  const rules = await loadRuleState();
-  const { text, report } = clean(source, { rules });
-
-  if (info.menuItemId === MENU_INSPECT) {
-    await chrome.storage.session
-      .set({ lastInspection: { report, sample: source.slice(0, 4000) } })
-      .catch(() => {});
-    await flashBadge(String(report.total), report.total > 0 ? '#b3261e' : '#146c2e');
-    return;
-  }
-
-  try {
-    const [{ result }] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: replaceSelectionInPage,
-      args: [text],
-    });
-    if (result?.replaced) {
-      await flashBadge(String(report.total), '#146c2e');
-    } else {
-      // Read-only context: stash the result so the popup can offer it.
-      await chrome.storage.session.set({ pendingResult: text }).catch(() => {});
-      await flashBadge('copy', '#8a6d00');
+    // Prefer the live selection: info.selectionText is normalised by Chrome and
+    // loses the very characters we are looking for.
+    let source = '';
+    try {
+      const [{ result }] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: readSelectionFromPage,
+      });
+      source = result ?? '';
+    } catch {
+      source = info.selectionText ?? '';
     }
-  } catch {
+    if (!source) {
+      await flashBadge('?', '#8a6d00');
+      return;
+    }
+
+    const rules = await loadRuleState();
+    const { text, report } = clean(source, { rules });
+
+    // Hand the result to the popup so there is something to read, not just a
+    // number on a badge. Reporting must never block the clean itself.
+    await stashResult({
+      report,
+      cleaned: text,
+      original: source.slice(0, 20000),
+      mode: info.menuItemId === MENU_INSPECT ? 'inspect' : 'clean',
+      at: Date.now(),
+    });
+
+    if (info.menuItemId === MENU_INSPECT) {
+      await flashBadge(String(report.total), report.total > 0 ? '#b3261e' : '#146c2e');
+      await openPopup();
+      return;
+    }
+
+    let replaced = false;
+    try {
+      const [{ result }] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: replaceSelectionInPage,
+        args: [text],
+      });
+      replaced = Boolean(result?.replaced);
+    } catch {
+      replaced = false;
+    }
+
+    if (replaced) {
+      await flashBadge(String(report.total), '#146c2e');
+      // Replaced in place: only open the report when there is something to say.
+      if (report.total > 0) await openPopup();
+    } else {
+      // Read-only context: the popup carries the cleaned text to copy.
+      await flashBadge('copy', '#8a6d00');
+      await openPopup();
+    }
+  } catch (error) {
+    console.error('TruePaste: context menu action failed', error);
     await flashBadge('!', '#b3261e');
   }
 });

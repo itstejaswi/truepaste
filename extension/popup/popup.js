@@ -31,12 +31,15 @@ async function init() {
   }
   renderRules();
 
-  // A context-menu clean on a read-only page leaves its result here.
+  // A context-menu action leaves its result here for us to report.
   try {
-    const { pendingResult } = await chrome.storage.session.get('pendingResult');
-    if (pendingResult) {
-      input.value = pendingResult;
-      await chrome.storage.session.remove('pendingResult');
+    const store = chrome.storage.session ?? chrome.storage.local;
+    const { lastResult } = await store.get('lastResult');
+    if (lastResult && Date.now() - lastResult.at < 60_000) {
+      input.value = lastResult.mode === 'inspect' ? lastResult.original : lastResult.cleaned;
+      renderReport(lastResult.report, false, lastResult.mode);
+      await store.remove('lastResult');
+      return;
     }
   } catch {
     // Session storage is optional.
@@ -88,17 +91,25 @@ function renderRules() {
   }
 }
 
-/** Render the findings for a completed clean. */
-function renderReport(report, copied) {
+/** Render the findings for a completed clean or inspection. */
+function renderReport(report, copied, mode = 'clean') {
   reportEl.replaceChildren();
 
   const summary = document.createElement('p');
   summary.className = `summary ${report.total > 0 ? 'found' : 'ok'}`;
   if (report.total === 0) {
-    summary.textContent = copied ? 'Nothing hidden found. Copied.' : 'Nothing hidden found.';
+    summary.textContent =
+      mode === 'inspect'
+        ? 'Nothing hidden in that selection.'
+        : copied
+          ? 'Nothing hidden found. Copied.'
+          : 'Nothing hidden found.';
   } else {
-    const noun = report.total === 1 ? 'item' : 'items';
-    summary.textContent = `Removed ${report.total} ${noun}${copied ? '. Copied.' : '.'}`;
+    const noun = report.total === 1 ? 'thing' : 'things';
+    summary.textContent =
+      mode === 'inspect'
+        ? `Found ${report.total} hidden ${noun}.`
+        : `Removed ${report.total} ${noun}${copied ? '. Copied.' : '.'}`;
   }
   reportEl.append(summary);
 
