@@ -658,6 +658,8 @@ h2 {
   justify-content: center;
   height: 100%;
   min-height: 0;
+  /* Sit the panel toward the outer edge, away from the divider. */
+  padding-left: 26px;
 }
 
 .demo {
@@ -1217,6 +1219,10 @@ textarea:focus-visible {
 /* Narrow ----------------------------------------------------------------- */
 
 @media (max-width: 1080px) {
+  .demo-col {
+    padding-left: 0;
+  }
+
   .head-inner {
     height: 76px;
     gap: 14px;
