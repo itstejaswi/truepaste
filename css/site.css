@@ -42,7 +42,7 @@
 
   --radius: 10px;
   --radius-sm: 6px;
-  --wrap: 1160px;
+  --wrap: 1280px;
 }
 
 /* Explicit theme choices override the system preference. */
@@ -515,8 +515,8 @@ h2 {
 /* A hairline divider between the columns, as a magazine spread would carry. */
 .home {
   display: grid;
-  grid-template-columns: 1fr 1.06fr;
-  gap: 56px;
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  gap: 60px;
   align-items: stretch;
   min-height: calc(100vh - 96px - 66px - 130px);
   position: relative;
@@ -535,7 +535,7 @@ h2 {
     top: 6%;
     bottom: 6%;
     /* Centred in the gutter between the two columns, not on the grid line. */
-    left: calc(50% - 15px);
+    left: calc(50% - 23px);
     width: 1px;
     background: linear-gradient(
       to bottom,
@@ -608,7 +608,7 @@ h2 {
   font-family: var(--serif);
   font-size: 15px;
   letter-spacing: -0.015em;
-  color: var(--ink);
+  color: var(--pop);
 }
 
 /* Privacy note ----------------------------------------------------------- */
@@ -664,7 +664,8 @@ h2 {
   display: flex;
   flex-direction: column;
   /* Fill most of the column, leaving room for the caption beneath. */
-  max-height: calc(100% - 46px);
+  max-height: calc(100% - 40px);
+  min-height: 300px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--raised);
@@ -689,12 +690,12 @@ h2 {
 }
 
 .demo-body {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 26px 22px;
-  min-height: 200px;
+  min-height: 190px;
 }
 
 .demo-body p {
@@ -1207,6 +1208,9 @@ textarea:focus-visible {
 }
 
 .foot-note {
+  font-family: var(--serif);
+  font-size: 13.5px;
+  letter-spacing: -0.02em;
   color: var(--ink-faint);
 }
 
