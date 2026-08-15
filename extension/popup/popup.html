@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TrustPaste</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <h1>TrustPaste</h1>
+      <button id="toggle-rules" class="link-btn" type="button" aria-expanded="false">
+        Rules
+      </button>
+    </header>
+
+    <section id="rules-panel" class="rules" hidden aria-label="Cleaning rules"></section>
+
+    <label class="field-label" for="input">Paste text</label>
+    <textarea
+      id="input"
+      class="field"
+      rows="6"
+      spellcheck="false"
+      placeholder="Paste here. Nothing leaves your device."
+    ></textarea>
+
+    <div class="actions">
+      <button id="clean" class="btn primary" type="button">Clean and copy</button>
+      <button id="clear" class="btn" type="button">Clear</button>
+    </div>
+
+    <section id="report" class="report" aria-live="polite"></section>
+
+    <footer class="foot">
+      <span class="dot" aria-hidden="true"></span>
+      <span>Offline. No network permissions.</span>
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
