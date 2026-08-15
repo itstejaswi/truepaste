@@ -1,5 +1,5 @@
 {
-  "name": "trustpaste",
+  "name": "truepaste",
   "version": "0.1.0",
   "description": "Removes hidden characters and metadata from text, entirely on your device.",
   "type": "module",

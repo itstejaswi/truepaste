@@ -1,7 +1,7 @@
 /**
  * Codepoint taxonomy.
  *
- * Single source of truth for every character class TrustPaste knows about.
+ * Single source of truth for every character class TruePaste knows about.
  * Kept free of transform logic so it can be audited on its own: a reviewer
  * should be able to read this file and know exactly what the tool touches.
  *

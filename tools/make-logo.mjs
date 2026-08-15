@@ -1,9 +1,14 @@
 /**
  * Logo generator.
  *
- * Draws the TrustPaste mark once, in code, and emits both the inline SVG used
- * on the site and the PNG sizes the extension manifest needs. No opaque binary
- * assets in the repository: every pixel is reproducible from this file.
+ * Draws the TruePaste mark and emits the PNG sizes the extension manifest and
+ * the site need. No opaque binary assets in the repository: every pixel here is
+ * reproducible from this file.
+ *
+ * The mark: a shield holding a paragraph. One line is broken, with the removed
+ * character marked in red; a green tick sweeps across the whole shield. Text is
+ * cut wherever it comes within the tick's clearance band, so the tick can never
+ * be crossed by a line - the clearance is computed, not eyeballed.
  *
  *   node tools/make-logo.mjs
  */
@@ -16,104 +21,143 @@ const ICON_DIR = resolve(import.meta.dirname, '..', 'extension', 'icons');
 const ASSET_DIR = resolve(import.meta.dirname, '..', 'assets');
 const PNG_SIZES = [16, 32, 48, 128, 256];
 
+/* Palette ---------------------------------------------------------------- */
+
+const INK = [44, 36, 24]; // #2c2418  shield
+const PAPER = [253, 246, 233]; // #fdf6e9  text lines
+const FLAG = [194, 65, 12]; // #c2410c  the removed character
+const GOOD = [77, 156, 90]; // #4d9c5a  the tick
+
+/* Geometry, in a 32-unit square ------------------------------------------- */
+
 /**
- * The mark: three stacked text lines inside a bracket, with the middle line
- * broken by a gap - text with something taken out of it. Drawn on a 24x24
- * grid so it stays crisp at small sizes.
+ * Shield outline, matching the SVG path:
+ *   M16 2.2 L27.4 6.4 V15.7 C..16 30.7.. C..4.6 15.7 V6.4 Z
+ * The lower half is two cubic curves, flattened below into a polygon.
  */
-const GEOMETRY = {
-  // Bracket: an open square missing its right edge, suggesting a container.
-  bracket: { x: 3.6, y: 3.2, w: 16.8, h: 17.6, r: 2.6, stroke: 1.9 },
-  lines: [
-    { y: 9.2, x1: 7.6, x2: 16.4, gap: null },
-    { y: 12.4, x1: 7.6, x2: 16.4, gap: [11.4, 13.0] },
-    { y: 15.6, x1: 7.6, x2: 13.6, gap: null },
+const SHIELD = {
+  apex: [16, 2.2],
+  shoulderRight: [27.4, 6.4],
+  waistRight: [27.4, 15.7],
+  point: [16, 30.7],
+  waistLeft: [4.6, 15.7],
+  shoulderLeft: [4.6, 6.4],
+  // Control points for the two curves that form the lower half.
+  ctrlRight: [
+    [27.4, 22.9],
+    [22.6, 28.1],
   ],
-  lineWidth: 1.7,
+  ctrlLeft: [
+    [9.4, 28.1],
+    [4.6, 22.9],
+  ],
 };
 
-function buildSvg({ mono = false } = {}) {
-  const { bracket: b, lines, lineWidth } = GEOMETRY;
-  const fg = mono ? 'currentColor' : 'var(--logo-fg, currentColor)';
+const TICK = {
+  points: [
+    [7.6, 15.6],
+    [13.4, 22.0],
+    [24.0, 8.8],
+  ],
+  width: 2.9,
+  clearance: 6.6, // total width of the gap the tick cuts through the text
+};
 
-  const segments = [];
-  for (const line of lines) {
-    if (!line.gap) {
-      segments.push(
-        `<path d="M${line.x1} ${line.y}H${line.x2}" stroke="${fg}" stroke-width="${lineWidth}" stroke-linecap="round"/>`
-      );
-    } else {
-      const [gapStart, gapEnd] = line.gap;
-      segments.push(
-        `<path d="M${line.x1} ${line.y}H${gapStart}" stroke="${fg}" stroke-width="${lineWidth}" stroke-linecap="round"/>`,
-        `<path d="M${gapEnd} ${line.y}H${line.x2}" stroke="${fg}" stroke-width="${lineWidth}" stroke-linecap="round"/>`
-      );
+/**
+ * Text lines, positioned clear of the tick's path.
+ * The upper-left region holds the opening lines; the lower-right region holds
+ * the broken line and its red remnant.
+ */
+const LINES = [
+  { y: 9.6, x1: 8.6, x2: 18.8, colour: PAPER, width: 1.9 },
+  { y: 13.2, x1: 8.6, x2: 15.0, colour: PAPER, width: 1.9 },
+  { y: 17.9, x1: 21.3, x2: 24.4, colour: FLAG, width: 2.1 },
+  { y: 21.6, x1: 18.6, x2: 23.4, colour: PAPER, width: 1.9 },
+];
+
+const SAMPLES = 4; // supersampling per axis
+
+/* Shield as a polygon ------------------------------------------------------ */
+
+function cubicAt(t, p0, c0, c1, p1) {
+  const u = 1 - t;
+  return [
+    u * u * u * p0[0] + 3 * u * u * t * c0[0] + 3 * u * t * t * c1[0] + t * t * t * p1[0],
+    u * u * u * p0[1] + 3 * u * u * t * c0[1] + 3 * u * t * t * c1[1] + t * t * t * p1[1],
+  ];
+}
+
+function buildShieldPolygon(steps = 48) {
+  const s = SHIELD;
+  const pts = [s.apex, s.shoulderRight, s.waistRight];
+  for (let i = 1; i <= steps; i += 1) {
+    pts.push(cubicAt(i / steps, s.waistRight, s.ctrlRight[0], s.ctrlRight[1], s.point));
+  }
+  for (let i = 1; i <= steps; i += 1) {
+    pts.push(cubicAt(i / steps, s.point, s.ctrlLeft[0], s.ctrlLeft[1], s.waistLeft));
+  }
+  pts.push(s.shoulderLeft);
+  return pts;
+}
+
+const SHIELD_POLY = buildShieldPolygon();
+
+/** Standard ray-casting point-in-polygon test. */
+function insideShield(x, y) {
+  let inside = false;
+  for (let i = 0, j = SHIELD_POLY.length - 1; i < SHIELD_POLY.length; j = i, i += 1) {
+    const [xi, yi] = SHIELD_POLY[i];
+    const [xj, yj] = SHIELD_POLY[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      inside = !inside;
     }
   }
-
-  return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">`,
-    `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="${b.r}" stroke="${fg}" stroke-width="${b.stroke}"/>`,
-    `<path d="M9.4 3.2h5.2" stroke="${fg}" stroke-width="${b.stroke}" stroke-linecap="round"/>`,
-    ...segments,
-    `</svg>`,
-  ].join('');
+  return inside;
 }
 
-/* ---------------------------------------------------------------- PNG ---- */
+/* Distance helpers --------------------------------------------------------- */
 
-const INK = [38, 38, 38];
-const PAPER = [254, 249, 237];
-const SAMPLES = 4;
-
-function insideRoundedRect(x, y, cx, cy, halfW, halfH, radius) {
-  const dx = Math.abs(x - cx) - (halfW - radius);
-  const dy = Math.abs(y - cy) - (halfH - radius);
-  const outer = Math.hypot(Math.max(dx, 0), Math.max(dy, 0));
-  return outer + Math.min(Math.max(dx, dy), 0) - radius;
-}
-
-/** Distance to a horizontal capsule, used for the text lines. */
-function insideCapsule(x, y, x1, x2, cy, halfThick) {
+/** Distance to a horizontal capsule - a stroked line with round caps. */
+function distCapsule(x, y, x1, x2, cy, halfThick) {
   const cx = (x1 + x2) / 2;
   const halfLen = (x2 - x1) / 2;
   const dx = Math.max(Math.abs(x - cx) - halfLen, 0);
-  const dy = Math.abs(y - cy);
-  return Math.hypot(dx, dy) - halfThick;
+  return Math.hypot(dx, y - cy) - halfThick;
 }
 
-/** Sample the mark in 24-unit space, returning a colour or null. */
-function sample(u, v) {
-  const { bracket: b, lines, lineWidth } = GEOMETRY;
+function distSegment(px, py, [ax, ay], [bx, by]) {
+  const vx = bx - ax;
+  const vy = by - ay;
+  const wx = px - ax;
+  const wy = py - ay;
+  const t = Math.max(0, Math.min(1, (wx * vx + wy * vy) / (vx * vx + vy * vy)));
+  return Math.hypot(px - (ax + t * vx), py - (ay + t * vy));
+}
 
-  // Rounded app-tile background.
-  if (insideRoundedRect(u, v, 12, 12, 12, 12, 5.4) > 0) return null;
+function distTick(x, y) {
+  const [a, b, c] = TICK.points;
+  return Math.min(distSegment(x, y, a, b), distSegment(x, y, b, c));
+}
 
-  const half = b.stroke / 2;
-  const outline = insideRoundedRect(
-    u,
-    v,
-    b.x + b.w / 2,
-    b.y + b.h / 2,
-    b.w / 2,
-    b.h / 2,
-    b.r
-  );
-  if (Math.abs(outline) <= half) return PAPER;
+/** Sample the mark at a point in 32-unit space. Returns a colour or null. */
+function sample(x, y) {
+  if (!insideShield(x, y)) return null;
 
-  // Tab across the top edge.
-  if (insideCapsule(u, v, 9.4, 14.6, b.y, half) <= 0) return PAPER;
+  const tickDist = distTick(x, y);
+  if (tickDist <= TICK.width / 2) return GOOD;
 
-  for (const line of lines) {
-    if (insideCapsule(u, v, line.x1, line.x2, line.y, lineWidth / 2) <= 0) {
-      if (line.gap && u > line.gap[0] - 0.35 && u < line.gap[1] + 0.35) {
-        return INK;
+  if (tickDist > TICK.clearance / 2) {
+    for (const line of LINES) {
+      if (distCapsule(x, y, line.x1, line.x2, line.y, line.width / 2) <= 0) {
+        return line.colour;
       }
-      return PAPER;
     }
   }
+
   return INK;
 }
+
+/* Rasteriser --------------------------------------------------------------- */
 
 function render(size) {
   const rows = [];
@@ -122,34 +166,36 @@ function render(size) {
     for (let px = 0; px < size; px += 1) {
       let r = 0;
       let g = 0;
-      let bl = 0;
+      let b = 0;
       let a = 0;
       for (let sy = 0; sy < SAMPLES; sy += 1) {
         for (let sx = 0; sx < SAMPLES; sx += 1) {
-          const u = ((px + (sx + 0.5) / SAMPLES) / size) * 24;
-          const v = ((py + (sy + 0.5) / SAMPLES) / size) * 24;
-          const colour = sample(u, v);
+          const x = ((px + (sx + 0.5) / SAMPLES) / size) * 32;
+          const y = ((py + (sy + 0.5) / SAMPLES) / size) * 32;
+          const colour = sample(x, y);
           if (colour) {
             r += colour[0];
             g += colour[1];
-            bl += colour[2];
+            b += colour[2];
             a += 255;
           }
         }
       }
       const total = SAMPLES * SAMPLES;
       const alpha = a / total;
-      const scale = a > 0 ? 255 / a : 0;
+      const scale = a > 0 ? 255 / a : 0; // un-premultiply so edges keep colour
       const o = 1 + px * 4;
       row[o] = Math.round(r * scale);
       row[o + 1] = Math.round(g * scale);
-      row[o + 2] = Math.round(bl * scale);
+      row[o + 2] = Math.round(b * scale);
       row[o + 3] = Math.round(alpha);
     }
     rows.push(row);
   }
   return Buffer.concat(rows);
 }
+
+/* PNG encoder -------------------------------------------------------------- */
 
 function crc32(buf) {
   let c = ~0;
@@ -173,8 +219,8 @@ function toPng(size, raw) {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0);
   ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 6;
+  ihdr[8] = 8; // bit depth
+  ihdr[9] = 6; // RGBA
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk('IHDR', ihdr),
@@ -183,11 +229,10 @@ function toPng(size, raw) {
   ]);
 }
 
+/* Output ------------------------------------------------------------------- */
+
 mkdirSync(ICON_DIR, { recursive: true });
 mkdirSync(ASSET_DIR, { recursive: true });
-
-writeFileSync(join(ASSET_DIR, 'logo.svg'), `${buildSvg({ mono: true })}\n`);
-console.log('logo.svg');
 
 for (const size of PNG_SIZES) {
   const png = toPng(size, render(size));

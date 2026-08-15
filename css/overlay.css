@@ -2,6 +2,13 @@
    Kept in its own file so the same styles can be injected by an opt-in
    content script later without pulling in the whole site stylesheet. */
 
+/* The hidden attribute must win over the display rules below; without this,
+   `display: flex` overrides the browser default and the button stays visible. */
+.tp-float-btn[hidden],
+.tp-panel[hidden] {
+  display: none !important;
+}
+
 .tp-float-btn {
   position: absolute;
   z-index: 900;

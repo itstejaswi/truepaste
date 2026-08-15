@@ -36,7 +36,7 @@ writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`Built ${OUT} (version ${pkg.version})`);
 
 if (process.argv.includes('--zip')) {
-  const zipPath = join(DIST, `trustpaste-${pkg.version}.zip`);
+  const zipPath = join(DIST, `truepaste-${pkg.version}.zip`);
   // PowerShell on Windows, zip elsewhere. Both are present on GitHub runners.
   if (process.platform === 'win32') {
     execFileSync('powershell', [
@@ -48,7 +48,7 @@ if (process.argv.includes('--zip')) {
     execFileSync('zip', ['-r', '-q', zipPath, '.'], { cwd: OUT });
   }
   const hash = createHash('sha256').update(readFileSync(zipPath)).digest('hex');
-  writeFileSync(`${zipPath}.sha256`, `${hash}  trustpaste-${pkg.version}.zip\n`);
+  writeFileSync(`${zipPath}.sha256`, `${hash}  truepaste-${pkg.version}.zip\n`);
   console.log(`Packaged ${zipPath}`);
   console.log(`SHA-256  ${hash}`);
 }

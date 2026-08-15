@@ -12,8 +12,8 @@
 import { clean } from './core/clean.js';
 import { defaultRuleState } from './core/rules.js';
 
-const MENU_CLEAN = 'trustpaste-clean-selection';
-const MENU_INSPECT = 'trustpaste-inspect-selection';
+const MENU_CLEAN = 'truepaste-clean-selection';
+const MENU_INSPECT = 'truepaste-inspect-selection';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.removeAll(() => {

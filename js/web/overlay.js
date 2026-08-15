@@ -202,7 +202,9 @@ export class SelectionOverlay {
   /** Show the floating button at the end of the current selection. */
   #showButton() {
     const selection = this.#selection();
-    if (!selection) {
+    // Also hide when the field is not on screen: switching views leaves the
+    // selection intact, and a button floating over another page looks broken.
+    if (!selection || this.field.offsetParent === null) {
       this.hide();
       return;
     }
@@ -225,6 +227,13 @@ export class SelectionOverlay {
   }
 
   #openPanel() {
+    // Never open over a hidden field: switching views leaves the selection
+    // intact, and the panel would float over an unrelated page.
+    if (this.field.offsetParent === null || !this.#selection()) {
+      this.hide();
+      return;
+    }
+
     this.#renderRules();
     this.#updateSummary();
 

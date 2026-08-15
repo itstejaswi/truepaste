@@ -1,6 +1,6 @@
-# TrustPaste
+# TruePaste
 
-**Everyone uses AI. Nobody wants to get called out for it.**
+**Your words, without hidden surprises.**
 
 Text copied out of a chat window picks up passengers: characters you cannot
 see, cannot select, and cannot delete. They survive every copy and paste and
@@ -9,7 +9,7 @@ ride along into your email, your essay, your pull request.
 Some are harmless formatting. Some carry a tracking marker or a watermark.
 Some carry an instruction meant for the next AI assistant that reads your text.
 
-TrustPaste finds them, decodes what they were carrying, and takes them out.
+TruePaste finds them, decodes what they were carrying, and takes them out.
 
 - **Runs entirely on your device.** No upload, no account, no limits.
 - **The page cannot phone home.** Its Content Security Policy sets
@@ -19,12 +19,12 @@ TrustPaste finds them, decodes what they were carrying, and takes them out.
 
 ## Try it
 
-Open [the website](https://itstejaswi.github.io/trustpaste/), or clone and run
+Open [the website](https://itstejaswi.github.io/truepaste/), or clone and run
 it locally:
 
 ```bash
-git clone https://github.com/itstejaswi/trustpaste.git
-cd trustpaste
+git clone https://github.com/itstejaswi/truepaste.git
+cd truepaste
 npm run dev          # http://localhost:8080
 ```
 
@@ -35,12 +35,12 @@ both refuse `.crx` files from anywhere else. Loading unpacked is the supported
 route for an extension distributed as source - and it means the code you run is
 the code you can read.
 
-1. Download `trustpaste-<version>.zip` from
-   [Releases](https://github.com/itstejaswi/trustpaste/releases).
+1. Download `truepaste-<version>.zip` from
+   [Releases](https://github.com/itstejaswi/truepaste/releases).
 2. Optionally verify it against the published SHA-256:
    ```powershell
-   Get-FileHash trustpaste.zip -Algorithm SHA256   # Windows
-   shasum -a 256 trustpaste.zip                    # macOS, Linux
+   Get-FileHash truepaste.zip -Algorithm SHA256   # Windows
+   shasum -a 256 truepaste.zip                    # macOS, Linux
    ```
 3. Unzip it somewhere permanent - the browser reloads from that folder at every
    start.
@@ -74,7 +74,7 @@ the choice of words - not in the characters. No amount of character cleaning
 touches them.
 
 Tools that promise to defeat AI detectors are describing a different problem.
-Detectors work on perplexity and burstiness, so TrustPaste will not change what
+Detectors work on perplexity and burstiness, so TruePaste will not change what
 they conclude. It removes hidden data and metadata; it does not rewrite prose.
 
 ## Script safety
@@ -84,7 +84,7 @@ channel and a hard requirement of several writing systems. Tools that strip them
 unconditionally corrupt emoji families, Devanagari conjuncts and Arabic
 ligatures.
 
-TrustPaste decides per occurrence. A joiner between two Latin letters is a
+TruePaste decides per occurrence. A joiner between two Latin letters is a
 payload; the same character inside `👨‍👩‍👦` or `क‍ष` is doing real work and is
 left alone. When context is ambiguous, the character stays - a sanitiser that
 silently damages valid text is worse than one that leaves a little noise.

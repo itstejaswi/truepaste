@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TrustPaste - clean the invisible junk out of AI text</title>
+    <title>TruePaste - your words, without hidden surprises</title>
     <meta
       name="description"
-      content="Everyone uses AI. Nobody wants to get called out for it. TrustPaste strips the invisible characters out of your text, right on your device."
+      content="Invisible characters ride along with copied text into your email, your essay, your pull request. TruePaste finds them and takes them out, right on your device."
     />
     <!--
       The privacy claim is enforced here, not just asserted in prose.
@@ -29,18 +29,53 @@
       <div class="wrap head-inner">
         <a class="brand" href="#" data-view-link="home">
           <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <rect x="3.6" y="3.2" width="16.8" height="17.6" rx="2.6" stroke="currentColor" stroke-width="1.9" />
-              <path d="M9.4 3.2h5.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
-              <path d="M7.6 9.2h8.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-              <path d="M7.6 12.4h3.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-              <path d="M13 12.4h3.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
-              <path d="M7.6 15.6h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            <!--
+              A shield holding a paragraph. One line is broken, with the removed
+              character marked in red; the green tick sweeps across the whole
+              shield. The mask cuts every line where the tick passes, so nothing
+              can ever run behind it.
+            -->
+            <svg viewBox="0 0 32 32">
+              <defs>
+                <mask id="tp-tick">
+                  <rect width="32" height="32" fill="#fff" />
+                  <path
+                    d="M7.4 15.4l6 6.6L24.2 8.6"
+                    stroke="#000" stroke-width="6.4"
+                    stroke-linecap="round" stroke-linejoin="round" fill="none"
+                  />
+                </mask>
+              </defs>
+              <path
+                d="M16 2.2l11.4 4.2v9.3c0 7.2-4.8 12.4-11.4 15C9.4 28.1 4.6 22.9 4.6 15.7V6.4z"
+                fill="currentColor"
+              />
+              <g mask="url(#tp-tick)">
+                <g class="mark-lines" stroke-width="1.9" stroke-linecap="round">
+                  <path d="M8.4 10.6h15.6" />
+                  <path d="M8.4 14.6h6" />
+                  <path d="M17.4 18.6h5" />
+                </g>
+                <path class="mark-cut" d="M17.4 14.6h3" stroke-width="2.1" stroke-linecap="round" />
+              </g>
+              <path
+                class="mark-tick"
+                d="M7.4 15.4l6 6.6L24.2 8.6"
+                stroke-width="2.8" stroke-linecap="round"
+                stroke-linejoin="round" fill="none"
+              />
             </svg>
           </span>
           <span class="brand-text">
-            <span class="brand-name">TrustPaste</span>
-            <span class="brand-tag">Paste like a human</span>
+            <span class="brand-name" aria-hidden="true">
+              <svg viewBox="0 0 132 34" fill="none" role="img">
+                <title>TruePaste</title>
+                <text x="0" y="25" class="wordmark" font-size="31" letter-spacing="-1">
+                  <tspan class="wordmark-a">True</tspan><tspan class="wordmark-b">Paste</tspan>
+                </text>
+              </svg>
+            </span>
+            <span class="brand-tag">Your words, without hidden surprises</span>
           </span>
         </a>
 
@@ -78,7 +113,7 @@
               <span class="sr-only">Dark</span>
             </button>
           </div>
-          <a class="head-link" href="https://github.com/itstejaswi/trustpaste">GitHub</a>
+          <a class="head-link" href="https://github.com/itstejaswi/truepaste">GitHub</a>
         </div>
       </div>
     </header>
@@ -89,15 +124,15 @@
         <div class="wrap home">
           <div class="home-copy">
             <p class="kicker">Paste with confidence</p>
-            <h1>Everyone uses AI. Nobody wants to&nbsp;get called out for&nbsp;it.</h1>
+            <h1>Your words should be the only thing people&nbsp;read.</h1>
             <p class="lede">
-              Your text picks up invisible passengers on the way out of a chat
-              window - characters you cannot see, cannot delete, and did not
-              agree to. They ride along into your email, your essay, your pull
-              request.
+              Text picks up invisible passengers along the way - characters you
+              cannot see, cannot select, and cannot delete. Chat windows, PDFs,
+              web pages and word processors all add their own. They ride along
+              into your email, your essay, your pull request.
             </p>
             <p class="lede">
-              TrustPaste finds them, shows you what they were carrying, and
+              TruePaste finds them, shows you what they were carrying, and
               throws them out. Free, open source, and it never sends your words
               anywhere.
             </p>
@@ -156,14 +191,14 @@
                   <label for="input">Your text</label>
                   <button id="sample" class="link-btn" type="button">Try an example</button>
                 </div>
-                <textarea id="input" rows="14" spellcheck="false" placeholder="Paste anything here."></textarea>
+                <textarea id="input" rows="10" spellcheck="false" placeholder="Paste anything here."></textarea>
               </div>
               <div class="pane">
                 <div class="pane-head">
                   <label for="output">Cleaned up</label>
                   <button id="copy" class="link-btn" type="button">Copy</button>
                 </div>
-                <textarea id="output" rows="14" spellcheck="false" readonly></textarea>
+                <textarea id="output" rows="10" spellcheck="false" readonly></textarea>
               </div>
             </div>
 
@@ -171,9 +206,9 @@
               <h3>What to clean</h3>
               <div id="rules"></div>
             </aside>
-          </div>
 
-          <div id="report" class="report" aria-live="polite"></div>
+            <div id="report" class="report" aria-live="polite"></div>
+          </div>
         </div>
       </section>
 
@@ -240,7 +275,7 @@
                 <p>
                   We will not pretend to beat AI detectors. Those work on word
                   choice and rhythm, not characters - nothing here changes what
-                  they think. TrustPaste takes out hidden junk and data. It does
+                  they think. TruePaste takes out hidden junk and data. It does
                   not rewrite your writing, and it will not lie to you about
                   what it does.
                 </p>
@@ -267,15 +302,15 @@
                 <h3>Download it</h3>
                 <p>
                   Grab the zip from the
-                  <a href="https://github.com/itstejaswi/trustpaste/releases">releases page</a>.
+                  <a href="https://github.com/itstejaswi/truepaste/releases">releases page</a>.
                   Every build is made in the open from tagged source.
                 </p>
               </li>
               <li>
                 <h3>Check it, if you're the checking sort</h3>
                 <p>Compare it to the checksum on the release.</p>
-                <pre><code>Get-FileHash trustpaste.zip -Algorithm SHA256   # Windows
-shasum -a 256 trustpaste.zip                    # Mac, Linux</code></pre>
+                <pre><code>Get-FileHash truepaste.zip -Algorithm SHA256   # Windows
+shasum -a 256 truepaste.zip                    # Mac, Linux</code></pre>
               </li>
               <li>
                 <h3>Unzip somewhere it can stay</h3>
@@ -379,8 +414,21 @@ shasum -a 256 trustpaste.zip                    # Mac, Linux</code></pre>
 
     <footer class="site-foot">
       <div class="wrap foot-inner">
-        <span><a href="https://github.com/itstejaswi/trustpaste">Source</a> &middot; MIT licensed &middot; Made for people who paste</span>
-        <span>Free forever. No accounts, no tracking, no catch.</span>
+        <nav class="foot-nav" aria-label="Elsewhere">
+          <a href="https://itstejaswi.github.io/#about" target="_blank" rel="noopener">
+            <span class="ext" aria-hidden="true">↗</span>About
+          </a>
+          <a href="https://itstejaswi.github.io/#work" target="_blank" rel="noopener">
+            <span class="ext" aria-hidden="true">↗</span>Projects
+          </a>
+          <a href="https://itstejaswi.github.io/#contact" target="_blank" rel="noopener">
+            <span class="ext" aria-hidden="true">↗</span>Contact
+          </a>
+          <a href="https://github.com/itstejaswi/truepaste" target="_blank" rel="noopener">
+            <span class="ext" aria-hidden="true">↗</span>Source
+          </a>
+        </nav>
+        <span class="foot-note">Free forever. No accounts, no tracking, no catch.</span>
       </div>
     </footer>
 

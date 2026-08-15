@@ -52,5 +52,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`TrustPaste dev server: http://localhost:${PORT}/`);
+  console.log(`TruePaste dev server: http://localhost:${PORT}/`);
 });

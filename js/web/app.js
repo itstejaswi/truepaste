@@ -10,8 +10,8 @@ import { clean } from '../core/clean.js';
 import { RULES, defaultRuleState } from '../core/rules.js';
 import { SelectionOverlay } from './overlay.js';
 
-const RULES_KEY = 'trustpaste.rules.v1';
-const THEME_KEY = 'trustpaste.theme.v1';
+const RULES_KEY = 'truepaste.rules.v1';
+const THEME_KEY = 'truepaste.theme.v1';
 
 const $ = (id) => document.getElementById(id);
 
@@ -61,6 +61,8 @@ function initTheme() {
 
 const VIEWS = ['home', 'tool', 'threats', 'install', 'privacy'];
 
+let overlay = null;
+
 function showView(name, { focus = false } = {}) {
   const view = VIEWS.includes(name) ? name : 'home';
 
@@ -70,6 +72,9 @@ function showView(name, { focus = false } = {}) {
   for (const tab of document.querySelectorAll('.tab')) {
     tab.setAttribute('aria-selected', String(tab.dataset.view === view));
   }
+
+  // The selection survives a view change; its floating button must not.
+  overlay?.hide();
 
   if (location.hash.slice(1) !== view) {
     history.replaceState(null, '', `#${view}`);

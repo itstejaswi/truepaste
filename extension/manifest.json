@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "TrustPaste",
+  "name": "TruePaste",
   "version": "0.1.0",
   "description": "Removes hidden characters and smuggled data from text. Runs entirely on your device.",
   "icons": {
@@ -9,7 +9,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "TrustPaste",
+    "default_title": "TruePaste",
     "default_popup": "popup/popup.html"
   },
   "background": {
@@ -26,7 +26,7 @@
         "default": "Ctrl+Shift+V",
         "mac": "Command+Shift+V"
       },
-      "description": "Open TrustPaste"
+      "description": "Open TruePaste"
     }
   }
 }
