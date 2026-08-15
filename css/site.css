@@ -153,8 +153,9 @@ kbd {
 
 /* Masthead --------------------------------------------------------------- */
 
+/* Masthead carries a double rule, as a magazine masthead does. */
 .site-head {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 3px double var(--line);
   background: color-mix(in srgb, var(--paper) 92%, transparent);
   backdrop-filter: blur(14px);
   position: sticky;
@@ -376,7 +377,7 @@ kbd {
 /* Views ------------------------------------------------------------------ */
 
 .view {
-  padding: 36px 0 48px;
+  padding: 30px 0 36px;
   animation: rise 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -408,9 +409,9 @@ kbd {
 }
 
 h1 {
-  margin: 0 0 22px;
+  margin: 0 0 18px;
   font-family: var(--serif);
-  font-size: clamp(42px, 5.8vw, 72px);
+  font-size: clamp(40px, 5.2vw, 64px);
   line-height: 1.0;
   letter-spacing: -0.042em;
   font-weight: 400;
@@ -428,10 +429,20 @@ h2 {
 
 .lede {
   margin: 0;
-  max-width: 64ch;
+  max-width: 62ch;
   color: var(--ink-soft);
-  font-size: 17.5px;
-  line-height: 1.62;
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+/* The opening paragraph of the home view takes a drop cap. */
+.home-copy .lede:first-of-type::first-letter {
+  float: left;
+  font-family: var(--serif);
+  font-size: 3em;
+  line-height: 0.84;
+  padding: 0.04em 0.1em 0 0;
+  color: var(--ink);
 }
 
 .lede + .lede {
@@ -495,35 +506,79 @@ h2 {
 
 /* Home ------------------------------------------------------------------- */
 
+/* A hairline divider between the columns, as a magazine spread would carry. */
 .home {
   display: grid;
   grid-template-columns: 1fr 1.06fr;
   gap: 56px;
   align-items: center;
-  min-height: calc(100vh - 96px - 110px);
+  min-height: calc(100vh - 96px - 66px - 130px);
+  position: relative;
+}
+
+@media (min-width: 1081px) {
+  .home::before {
+    content: '';
+    position: absolute;
+    top: 6%;
+    bottom: 6%;
+    left: calc(50% - 4px);
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      var(--line) 12%,
+      var(--line) 88%,
+      transparent
+    );
+  }
+}
+
+/* Dateline: the small line of metadata a magazine sets above its standfirst. */
+.dateline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.dateline::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--line);
+}
+
+.dateline .sep {
+  color: var(--line);
 }
 
 .home-actions {
   display: flex;
   gap: 13px;
-  margin-top: 30px;
+  margin-top: 28px;
   flex-wrap: wrap;
 }
 
 .home-facts {
   display: flex;
   gap: 30px;
-  margin: 38px 0 0;
-  padding-top: 26px;
+  margin: 22px 0 0;
+  padding-top: 20px;
   border-top: 1px solid var(--line);
   flex-wrap: wrap;
 }
 
 .fact dt {
   font-family: var(--serif);
-  font-size: 30px;
+  font-size: 27px;
   letter-spacing: -0.03em;
-  margin: 0 0 3px;
+  margin: 0 0 2px;
   color: var(--pop);
 }
 
@@ -538,17 +593,17 @@ h2 {
 
 .privacy-note {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 11px;
-  margin: 26px 0 0;
-  padding: 13px 16px;
+  margin: 22px 0 0;
+  padding: 11px 15px;
   border: 1px solid color-mix(in srgb, var(--good) 32%, var(--line));
   border-radius: var(--radius);
   background: var(--good-soft);
   font-size: 13.5px;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--ink-soft);
-  max-width: 58ch;
+  max-width: 56ch;
 }
 
 .privacy-note strong {
