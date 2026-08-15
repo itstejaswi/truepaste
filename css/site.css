@@ -381,6 +381,15 @@ kbd {
   animation: rise 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Inner views fill the screen the way the home view does, so the footer
+   settles at the bottom instead of floating up under short content. */
+.view:not(#view-home) > .wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(100vh - 96px - 66px - 130px);
+}
+
 .view[hidden] {
   display: none;
 }

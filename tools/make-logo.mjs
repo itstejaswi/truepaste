@@ -155,23 +155,21 @@ function insideTile(x, y) {
 /**
  * Sample the mark at a point in 32-unit space. Returns a colour or null.
  *
- * Below 128px the shield outline and the text lines cannot hold their shape, so
- * the small icons show the tile and a bolder tick alone - the same silhouette
- * the eye reads at a glance, without the detail that would blur into mud.
+ * The text lines inside the shield cannot hold their shape below 128px, so the
+ * small icons drop them and show the shield with the tick alone. The shield
+ * itself stays at every size: it is one solid form, and it is what makes the
+ * mark ours rather than a generic tick.
  */
 function sample(x, y, size) {
   if (!insideTile(x, y)) return null;
+  if (!insideShield(x, y)) return TILE;
 
   const small = size < 128;
   const tickDist = distTick(x, y);
-  const tickWidth = small ? TICK.width * 1.55 : TICK.width;
+  const tickWidth = small ? TICK.width * 1.3 : TICK.width;
 
-  if (small) {
-    return tickDist <= tickWidth / 2 ? GOOD : TILE;
-  }
-
-  if (!insideShield(x, y)) return TILE;
   if (tickDist <= tickWidth / 2) return GOOD;
+  if (small) return SHIELD;
 
   if (tickDist > TICK.clearance / 2) {
     for (const line of TEXT_LINES) {
