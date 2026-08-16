@@ -1,15 +1,20 @@
 {
-  "name": "truepaste",
-  "version": "0.1.0",
-  "description": "Removes hidden characters and metadata from text, entirely on your device.",
-  "type": "module",
-  "private": true,
-  "license": "MIT",
-  "scripts": {
-    "test": "node --test tests/*.test.mjs",
-    "dev": "node tools/serve.mjs"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+    "name":  "truepaste",
+    "version":  "0.1.0",
+    "description":  "Removes hidden characters and metadata from text, entirely on your device.",
+    "type":  "module",
+    "private":  true,
+    "scripts":  {
+                    "test":  "node --test tests/*.test.mjs",
+                    "dev":  "node tools/serve.mjs"
+                },
+    "engines":  {
+                    "node":  "\u003e=20"
+                },
+    "license":  "AGPL-3.0-or-later",
+    "author":  "Tejaswi C (https://itstejaswi.github.io)",
+    "repository":  {
+                       "type":  "git",
+                       "url":  "https://github.com/itstejaswi/truepaste.git"
+                   }
 }
