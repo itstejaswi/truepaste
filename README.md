@@ -1,4 +1,4 @@
-# TruePaste
+﻿# TruePaste
 
 **Your words, without hidden surprises.**
 
@@ -142,6 +142,6 @@ Copyright (C) 2026 Tejaswi C.
 
 Released under the [GNU AGPL v3](LICENSE). You may use, study, modify and share
 it freely. If you run a modified version and let others use it over a network,
-section 13 requires you to offer them your source as well � rehosting it
+section 13 requires you to offer them your source as well — rehosting it
 unchanged is welcome, rehosting it changed and silent is not.
 
